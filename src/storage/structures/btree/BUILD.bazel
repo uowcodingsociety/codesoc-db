@@ -1,0 +1,6 @@
+cc_library(
+  name = "btree",
+  srcs = ["btree.cpp"],
+  hdrs = ["btree.hpp"],
+  visibility = ["//src:__subpackages__"],
+)

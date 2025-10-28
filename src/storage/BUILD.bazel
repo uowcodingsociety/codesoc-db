@@ -1,0 +1,7 @@
+cc_library(
+  name = "storage",
+  deps = [
+    "//src/storage/structures",
+  ],
+  visibility = ["//src:__subpackages__"],
+)

@@ -1,0 +1,20 @@
+# build outputs
+bazel-*
+/bazel-bin
+/bazel-out
+/bazel-testlogs
+/bazel-codesoc-db
+
+# bazel internals
+.bazel
+.bazelrc.user
+.bazelversion
+
+# ide files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+

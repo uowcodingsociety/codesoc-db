@@ -1,0 +1,7 @@
+cc_library(
+  name = "structures",
+  deps = [
+    "//src/storage/structures/btree",
+  ],
+  visibility = ["//src:__subpackages__"],
+)

@@ -1,0 +1,14 @@
+cc_library(
+  name = "inverted_index",
+  srcs = ["inverted_index.cpp"],
+  hdrs = ["inverted_index.hpp"],
+  visibility = ["//src:__subpackages__"],
+)
+
+cc_library(
+  name = "index",
+  deps = [
+    ":inverted_index",
+  ],
+  visibility = ["//src:__subpackages__"],
+)

@@ -1,0 +1,7 @@
+cc_library(
+  name = "query",
+  deps = [
+    "//src/query/lexer",
+  ],
+  visibility = ["//src:__subpackages__"],
+)

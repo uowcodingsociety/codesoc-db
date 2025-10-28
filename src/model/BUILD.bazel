@@ -1,0 +1,4 @@
+cc_library(
+  name = "model",
+  visibility = ["//src:__subpackages__"],
+)
