@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 #include <set>
+#include <optional>
 
 template <typename Term, typename Doc>
 class InvertedIndex {
@@ -24,7 +25,7 @@ class InvertedIndex {
         /**
          * Returns a postings list for a given term.
          */
-        const std::set<Doc>& get_postings(const Term& term) const;
+        std::optional<const std::set<Doc>&> get_postings(const Term& term) const;
 
         /**
          * Adds a posting 
@@ -36,17 +37,20 @@ class InvertedIndex {
         /**
          * Adds a document to the index.
          */
-        void add_document(Doc& doc_id, const std::vector<Term>& terms);
+        template <class Self>
+        void add_document(this Self& self, Doc& doc_id, const std::vector<Term>& terms);
 
         /**
          * Searches for DocIDs that contain all given terms (AND query).
          */
-        std::set<Doc> search_and(const std::vector<Term>& terms) const;
+        template <class Self>
+        std::set<Doc> search_and(this const Self& self, const std::vector<Term>& terms);
 
         /**
          * Searches for DocIDs that contain any given term (OR query).
          */
-        std::set<Doc> search_or(const std::vector<Term>& terms) const;
+        template <class Self>
+        std::set<Doc> search_or(this const Self& self, const std::vector<Term>& terms);
 
 };
 
@@ -69,16 +73,14 @@ std::set<Doc> InvertedIndex<Term, Doc>::set_union(const std::set<Doc>& a, const 
 }
 
 template <typename Term, typename Doc>
-const std::set<Doc>& InvertedIndex<Term, Doc>::get_postings(const Term& term) const {
-    static const std::set<Doc> empty_set;
-    
+std::optional<const std::set<Doc>&> InvertedIndex<Term, Doc>::get_postings(const Term& term) const {
     auto itr = index.find(term);
 
     if (itr != index.end()) {
         return itr->second;
     }
     else {
-        return empty_set;
+        return std::nullopt;
     }
 }
 
@@ -88,39 +90,42 @@ void InvertedIndex<Term, Doc>::add_posting(const Term& term, Doc doc_id) {
 }
 
 template <typename Term, typename Doc>
-void InvertedIndex<Term, Doc>::add_document(Doc& doc_id, const std::vector<Term>& terms) {
+template <class Self>
+void InvertedIndex<Term, Doc>::add_document(this Self& self, Doc& doc_id, const std::vector<Term>& terms) {
     for (const Term& term : terms) {
-        add_posting(term, doc_id);
+        self.add_posting(term, doc_id);
     }
 }
 
 template <typename Term, typename Doc>
-std::set<Doc> InvertedIndex<Term, Doc>::search_and(const std::vector<Term>& terms) const {
+template <class Self>
+std::set<Doc> InvertedIndex<Term, Doc>::search_and(this const Self& self, const std::vector<Term>& terms) {
     if (terms.empty()) {
         return {};
     }
     
-    std::set<Doc> result = get_postings(terms[0]);
+    std::set<Doc> result = self.get_postings(terms[0]).value_or({});
         
     for (int i = 1; i < terms.size(); ++i) {
-        const std::set<Doc>& postings_list = get_postings(terms[i]);
-        result = intersect(result, postings_list);
+        std::set<Doc> postings_list = self.get_postings(terms[i]).value_or({});
+        result = InvertedIndex<Term, Doc>::intersect(result, postings_list);
     }
 
     return result;
 }
 
 template <typename Term, typename Doc>
-std::set<Doc> InvertedIndex<Term, Doc>::search_or(const std::vector<Term>& terms) const {
+template <class Self>
+std::set<Doc> InvertedIndex<Term, Doc>::search_or(this const Self& self, const std::vector<Term>& terms) {
     if (terms.empty()) {
         return {};
     }
     
-    std::set<Doc> result = get_postings(terms[0]);
-
+    std::set<Doc> result = self.get_postings(terms[0]).value_or({});
+ 
     for (int i = 1; i < terms.size(); ++i) {
-        const std::set<Doc>& postings_list = get_postings(terms[i]);
-        result = set_union(result, postings_list);
+        std::set<Doc> postings_list = self.get_postings(terms[i]).value_or({});
+        result = InvertedIndex<Term, Doc>::set_union(result, postings_list);
     }
     return result;
 }
